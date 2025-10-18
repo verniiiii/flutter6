@@ -3,7 +3,14 @@ import '../models/transaction.dart';
 import '../data/categories.dart';
 
 class TransactionFormScreen extends StatefulWidget {
-  final void Function(String title, String description, double amount, TransactionType type, String category) onSave;
+  final void Function(
+      String title,
+      String description,
+      double amount,
+      TransactionType type,
+      String category,
+      String? imageUrl, // Добавлен параметр для URL изображения
+      ) onSave;
   final VoidCallback onCancel;
 
   const TransactionFormScreen({
@@ -20,6 +27,7 @@ class _TransactionFormScreenState extends State<TransactionFormScreen> {
   final _titleController = TextEditingController();
   final _descriptionController = TextEditingController();
   final _amountController = TextEditingController();
+  final _imageUrlController = TextEditingController(); // Новый контроллер для URL изображения
 
   TransactionType _type = TransactionType.expense;
   String _selectedCategory = TransactionCategories.expenseCategories[0];
@@ -40,13 +48,34 @@ class _TransactionFormScreenState extends State<TransactionFormScreen> {
     final title = _titleController.text.trim();
     final description = _descriptionController.text.trim();
     final amount = double.tryParse(_amountController.text.trim()) ?? 0.0;
+    final imageUrl = _imageUrlController.text.trim(); // Получаем URL изображения
 
     if (title.isEmpty || amount <= 0) {
       _showError('Заполните название и сумму (больше 0)');
       return;
     }
 
-    widget.onSave(title, description, amount, _type, _selectedCategory);
+    // Валидация URL (если поле не пустое)
+    if (imageUrl.isNotEmpty) {
+      final urlPattern = RegExp(
+        r'^(https?://)?([\da-z.-]+)\.([a-z.]{2,6})([/\w .-]*)*/?$',
+        caseSensitive: false,
+      );
+      if (!urlPattern.hasMatch(imageUrl)) {
+        _showError('Введите корректный URL изображения');
+        return;
+      }
+    }
+
+    // Передаем imageUrl (может быть null если пустая строка)
+    widget.onSave(
+      title,
+      description,
+      amount,
+      _type,
+      _selectedCategory,
+      imageUrl.isNotEmpty ? imageUrl : null,
+    );
   }
 
   void _showError(String message) {
@@ -135,6 +164,19 @@ class _TransactionFormScreenState extends State<TransactionFormScreen> {
 
             const SizedBox(height: 16),
 
+            // Поле URL изображения
+            TextField(
+              controller: _imageUrlController,
+              decoration: const InputDecoration(
+                labelText: 'URL изображения',
+                border: OutlineInputBorder(),
+                hintText: 'https://example.com/image.jpg',
+              ),
+              keyboardType: TextInputType.url,
+            ),
+
+            const SizedBox(height: 16),
+
             // Выбор категории
             DropdownButtonFormField<String>(
               value: _selectedCategory,
@@ -176,6 +218,7 @@ class _TransactionFormScreenState extends State<TransactionFormScreen> {
     _titleController.dispose();
     _descriptionController.dispose();
     _amountController.dispose();
+    _imageUrlController.dispose(); // Не забываем освободить новый контроллер
     super.dispose();
   }
 }

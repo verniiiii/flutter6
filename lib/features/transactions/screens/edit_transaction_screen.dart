@@ -22,6 +22,7 @@ class _EditTransactionScreenState extends State<EditTransactionScreen> {
   final _titleController = TextEditingController();
   final _descriptionController = TextEditingController();
   final _amountController = TextEditingController();
+  final _imageUrlController = TextEditingController(); // Новый контроллер для URL изображения
 
   late TransactionType _type;
   late String _selectedCategory;
@@ -34,16 +35,31 @@ class _EditTransactionScreenState extends State<EditTransactionScreen> {
     _amountController.text = widget.transaction.amount.toStringAsFixed(2);
     _type = widget.transaction.type;
     _selectedCategory = widget.transaction.category;
+    // Инициализируем контроллер URL изображения
+    _imageUrlController.text = widget.transaction.imageUrl ?? '';
   }
 
   void _submit() {
     final title = _titleController.text.trim();
     final description = _descriptionController.text.trim();
     final amount = double.tryParse(_amountController.text.trim()) ?? 0.0;
+    final imageUrl = _imageUrlController.text.trim(); // Получаем URL изображения
 
     if (title.isEmpty || amount <= 0) {
       _showError('Заполните название и сумму (больше 0)');
       return;
+    }
+
+    // Валидация URL (если поле не пустое)
+    if (imageUrl.isNotEmpty) {
+      final urlPattern = RegExp(
+        r'^(https?://)?([\da-z.-]+)\.([a-z.]{2,6})([/\w .-]*)*/?$',
+        caseSensitive: false,
+      );
+      if (!urlPattern.hasMatch(imageUrl)) {
+        _showError('Введите корректный URL изображения');
+        return;
+      }
     }
 
     final updatedTransaction = widget.transaction.copyWith(
@@ -52,6 +68,7 @@ class _EditTransactionScreenState extends State<EditTransactionScreen> {
       amount: amount,
       type: _type,
       category: _selectedCategory,
+      imageUrl: imageUrl.isNotEmpty ? imageUrl : null, // Сохраняем URL или null если пусто
     );
 
     widget.onUpdate(updatedTransaction);
@@ -107,6 +124,7 @@ class _EditTransactionScreenState extends State<EditTransactionScreen> {
 
             const SizedBox(height: 20),
 
+            // Поле для названия транзакции
             TextField(
               controller: _titleController,
               decoration: const InputDecoration(
@@ -117,6 +135,7 @@ class _EditTransactionScreenState extends State<EditTransactionScreen> {
 
             const SizedBox(height: 16),
 
+            // Поле для описания транзакции
             TextField(
               controller: _descriptionController,
               decoration: const InputDecoration(
@@ -128,6 +147,7 @@ class _EditTransactionScreenState extends State<EditTransactionScreen> {
 
             const SizedBox(height: 16),
 
+            // Поле для суммы транзакции
             TextField(
               controller: _amountController,
               keyboardType: TextInputType.number,
@@ -140,6 +160,19 @@ class _EditTransactionScreenState extends State<EditTransactionScreen> {
 
             const SizedBox(height: 16),
 
+            // Поле для URL изображения (новое поле)
+            TextField(
+              controller: _imageUrlController,
+              decoration: const InputDecoration(
+                labelText: 'URL изображения',
+                border: OutlineInputBorder(),
+                hintText: 'https://example.com/image.jpg',
+              ),
+            ),
+
+            const SizedBox(height: 16),
+
+            // Выбор категории
             DropdownButtonFormField<String>(
               value: _selectedCategory,
               decoration: const InputDecoration(
@@ -161,6 +194,7 @@ class _EditTransactionScreenState extends State<EditTransactionScreen> {
 
             const SizedBox(height: 30),
 
+            // Кнопки действий
             Row(
               children: [
                 Expanded(
@@ -195,6 +229,7 @@ class _EditTransactionScreenState extends State<EditTransactionScreen> {
     _titleController.dispose();
     _descriptionController.dispose();
     _amountController.dispose();
+    _imageUrlController.dispose();
     super.dispose();
   }
 }
