@@ -6,6 +6,7 @@ class Transaction {
   final DateTime createdAt;
   final TransactionType type;
   final String category;
+  final String? imageUrl;
 
   const Transaction({
     required this.id,
@@ -15,6 +16,7 @@ class Transaction {
     required this.createdAt,
     required this.type,
     required this.category,
+    this.imageUrl,
   });
 
   Transaction copyWith({
@@ -25,6 +27,7 @@ class Transaction {
     DateTime? createdAt,
     TransactionType? type,
     String? category,
+    String? imageUrl,
   }) {
     return Transaction(
       id: id ?? this.id,
@@ -34,6 +37,7 @@ class Transaction {
       createdAt: createdAt ?? this.createdAt,
       type: type ?? this.type,
       category: category ?? this.category,
+      imageUrl: imageUrl ?? this.imageUrl,
     );
   }
 
