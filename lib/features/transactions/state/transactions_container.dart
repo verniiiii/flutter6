@@ -66,7 +66,14 @@ class _TransactionsContainerState extends State<TransactionsContainer> {
     });
   }
 
-  void _addTransaction(String title, String description, double amount, TransactionType type, String category) {
+  void _addTransaction(
+      String title,
+      String description,
+      double amount,
+      TransactionType type,
+      String category,
+      String? imageUrl, // Добавлен новый параметр
+      ) {
     setState(() {
       final newTransaction = Transaction(
         id: DateTime.now().microsecondsSinceEpoch.toString(),
@@ -76,6 +83,7 @@ class _TransactionsContainerState extends State<TransactionsContainer> {
         createdAt: DateTime.now(),
         type: type,
         category: category,
+        imageUrl: imageUrl, // Передаем imageUrl в конструктор
       );
       _transactions.insert(0, newTransaction);
       // Обновляем отфильтрованный список
@@ -182,7 +190,7 @@ class _TransactionsContainerState extends State<TransactionsContainer> {
           onAdd: _showForm,
           onToggle: _toggleTransaction,
           onDelete: _deleteTransaction,
-          onEdit: _showEditScreen, // Добавляем callback для редактирования
+          onEdit: _showEditScreen,
           balance: _balance,
           totalIncome: _totalIncome,
           totalExpenses: _totalExpenses,
